@@ -1,3 +1,11 @@
+# Ignore all node_modules directories
+**/node_modules/
+
+# Ignore all dist directories
+**/dist/
+
+# Other common files and directories to ignore
+
 # Logs
 logs
 *.log
@@ -16,9 +24,6 @@ coverage
 # nyc test coverage
 .nyc_output
 
-# Dependency directories
-node_modules
-
 # Optional npm cache directory
 .npm
 
@@ -34,15 +39,12 @@ node_modules
 # dotenv environment variables file
 .env
 
-# NestJS build output
-dist
-
 # temporary
-.tmp
+.tmp/
 
 # IDEs and editors
-.idea
-.vscode
+.idea/
+.vscode/
 *.swp
 *.swo
 
