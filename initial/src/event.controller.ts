@@ -1,6 +1,7 @@
 import { Controller, Delete, Get, Param, Patch, Post, Body, HttpCode, NotFoundException, HttpStatus, Res } from "@nestjs/common";
 import { Response } from 'express';
 import { CreateEventDTO } from "./create.event.dto";
+import { UpdatedCreateEventDTO } from "./update.event.dto";
 
 
 
@@ -16,8 +17,8 @@ export class EventController {
     @Post()
     create(@Body() input: CreateEventDTO): CreateEventDTO { return input }
     @Patch(':id')
-    update(@Param('id') id, @Body() input: any): any {
-
+    update(@Param('id') id, @Body() input: UpdatedCreateEventDTO): UpdatedCreateEventDTO {
+        return input;
     }
     @Delete()
     remove(@Res() res: Response) {
