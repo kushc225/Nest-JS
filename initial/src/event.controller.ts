@@ -2,26 +2,48 @@ import { Controller, Delete, Get, Param, Patch, Post, Body, HttpCode, NotFoundEx
 import { Response } from 'express';
 import { CreateEventDTO } from "./create.event.dto";
 import { UpdatedCreateEventDTO } from "./update.event.dto";
+import { Event } from "./event.entity";
 
 
 
 @Controller('/events')
 export class EventController {
+
+    private events: Event[] = []
+
     // create resources 
     @Get()
     findAll() {
-        return ["kush", "kumar"]
+        return this.events;
     }
     @Get(':id')
-    findOne(@Param('id') name) { return name }
-    @Post()
-    create(@Body() input: CreateEventDTO): CreateEventDTO { return input }
-    @Patch(':id')
-    update(@Param('id') id, @Body() input: UpdatedCreateEventDTO): UpdatedCreateEventDTO {
-        return input;
+    findOne(@Param('id') id): CreateEventDTO {
+        const data = this.events.find((ele) => ele.id === (id));
+        console.log(this.events)
+        return data
     }
-    @Delete()
-    remove(@Res() res: Response) {
+    @Post()
+    create(@Body() input: CreateEventDTO): CreateEventDTO {
+        const obj = { id: this.events.length + 1 + "", when: new Date(), ...input }
+        this.events.push(obj)
+        return obj;
+    }
+    @Patch(':id')
+    update(@Res() res: Response, @Param('id') id, @Body() input: UpdatedCreateEventDTO): UpdatedCreateEventDTO | Response<any, Record<string, any>> {
+        const data = this.events.find(ele => ele.id === id);
+        if (!data) return res.status(HttpStatus.NOT_FOUND).json({ ...input, message: 'Not Found' });
+        const newdata = { ...data, ...input };
+        this.events.push(newdata);
+        return newdata;
+    }
+    @Delete(":id")
+    remove(@Res() res: Response, @Param("id") id) {
+
+        const data = this.events.filter(ele => ele.id !== id);
+        this.events = [];
+        this.events = data;
+        return data;
+
         // Your logic to determine if the event exists or not
         const eventExists = false; // This is just an example, replace with actual logic
 
