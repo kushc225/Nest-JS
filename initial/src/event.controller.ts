@@ -1,67 +1,49 @@
-import { Controller, Delete, Get, Param, Patch, Post, Body, HttpCode, NotFoundException, HttpStatus, Res } from "@nestjs/common";
-import { Response } from 'express';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Event } from './event.entity';
 import { CreateEventDTO } from "./create.event.dto";
 import { UpdatedCreateEventDTO } from "./update.event.dto";
-import { Event } from "./event.entity";
-
-
-
 @Controller('/events')
-export class EventController {
+export class EventsController {
+  constructor(
+    @InjectRepository(Event)
+    private readonly repository: Repository<Event>
+  ) { }
 
-    private events: Event[] = []
+  @Get()
+  async findAll() {
+    return await this.repository.find();
+  }
 
-    // create resources 
-    @Get()
-    findAll() {
-        return this.events;
-    }
-    @Get(':id')
-    findOne(@Param('id') id): CreateEventDTO {
-        const data = this.events.find((ele) => ele.id === (id));
-        console.log(this.events)
-        return data
-    }
-    @Post()
-    create(@Body() input: CreateEventDTO): CreateEventDTO {
-        const obj = { id: this.events.length + 1 + "", when: new Date(), ...input }
-        this.events.push(obj)
-        return obj;
-    }
-    @Patch(':id')
-    update(@Res() res: Response, @Param('id') id, @Body() input: UpdatedCreateEventDTO): UpdatedCreateEventDTO | Response<any, Record<string, any>> {
-        const data = this.events.find(ele => ele.id === id);
-        if (!data) return res.status(HttpStatus.NOT_FOUND).json({ ...input, message: 'Not Found' });
-        const newdata = { ...data, ...input };
-        this.events.push(newdata);
-        return newdata;
-    }
-    @Delete(":id")
-    remove(@Res() res: Response, @Param("id") id) {
+  @Get(':id')
+  async findOne(@Param('id') id) {
+    return await this.repository.findOne(id);
+  }
 
-        const data = this.events.filter(ele => ele.id !== id);
-        this.events = [];
-        this.events = data;
-        return data;
+  @Post()
+  async create(@Body() input: CreateEventDTO) {
+    return await this.repository.save({
+      ...input,
+      when: new Date(input.when)
+    });
+  }
 
-        // Your logic to determine if the event exists or not
-        const eventExists = false; // This is just an example, replace with actual logic
+  @Patch(':id')
+  async update(@Param('id') id, @Body() input: UpdatedCreateEventDTO) {
+    const event = await this.repository.findOne(id);
 
-        if (!eventExists) {
-            // If the event doesn't exist, send a 404 response
-            return res.status(HttpStatus.NOT_FOUND).json({
-                statusCode: HttpStatus.NOT_FOUND,
-                message: 'Event with id not found',
-                error: 'Not Found',
-            });
-        }
+    return await this.repository.save({
+      ...event,
+      ...input,
+      when: input.when ? new Date(input.when) : event.when
+    });
+  }
 
-        // If the event exists, you can proceed with deletion logic and send a 200 response
-        // Perform deletion logic here...
-
-        return res.status(HttpStatus.OK).json({
-            statusCode: HttpStatus.OK,
-            message: 'Event deleted successfully',
-        });
-    }
-} 
+  @Delete(':id')
+  @HttpCode(204)
+  async remove(@Param('id') id) {
+    const event = await this.repository.findOne(id);
+    await this.repository.remove(event);
+  }
+}
