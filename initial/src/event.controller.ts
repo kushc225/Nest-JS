@@ -9,13 +9,13 @@ import {
   Patch,
   Post,
   Res,
+  ValidationPipe,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { Event } from './event.entity';
 import { CreateEventDTO } from './create.event.dto';
 import { UpdatedCreateEventDTO } from './update.event.dto';
-import { skip } from 'node:test';
 @Controller('/events')
 export class EventsController {
   constructor(
@@ -46,7 +46,7 @@ export class EventsController {
   }
 
   @Post()
-  async create(@Body() input: CreateEventDTO) {
+  async create(@Body(ValidationPipe) input: CreateEventDTO) {
     try {
       const data = await this.repository.save({
         ...input,
