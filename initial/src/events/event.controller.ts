@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Patch,
   Post,
@@ -18,6 +19,7 @@ import { CreateEventDTO } from './create.event.dto';
 import { UpdatedCreateEventDTO } from './update.event.dto';
 @Controller('/events')
 export class EventsController {
+  private readonly logger = new Logger(EventsController.name);
   constructor(
     @InjectRepository(Event)
     private readonly repository: Repository<Event>,
@@ -25,7 +27,10 @@ export class EventsController {
 
   @Get()
   async findAll() {
-    return await this.repository.find();
+    this.logger.log(`Hit the all find route`)
+    const data = await this.repository.find();
+    this.logger.debug(`Found ${data.length } events`);
+    return data;
   }
   @Get('/practice')
   async pathAll() {
@@ -46,7 +51,7 @@ export class EventsController {
   }
 
   @Post()
-  async create(@Body(new ValidationPipe({groups : ['create']})) input: CreateEventDTO) {
+  async create(@Body() input: CreateEventDTO) {
     try {
       const data = await this.repository.save({
         ...input,
@@ -61,7 +66,7 @@ export class EventsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id, @Body(new ValidationPipe({groups : ['update']})) input: UpdatedCreateEventDTO) {
+  async update(@Param('id') id, @Body() input: UpdatedCreateEventDTO) {
     const event = await this.repository.findOneBy({ id });
 
     return await this.repository.save({

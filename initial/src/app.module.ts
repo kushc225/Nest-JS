@@ -1,25 +1,29 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import {EventsController}  from './event.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Event } from './event.entity';
+import { Event } from './events/event.entity';
+import { EventsModule } from './events/events.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [TypeOrmModule.forRoot({
-    type : 'postgres',
-    host: '127.0.0.1',
-    port: 5432,
-    username : 'postgres',
-    password : 'admin',
-    database : 'test',
-    entities : [Event],
-    synchronize : true
-  }),
-  TypeOrmModule.forFeature([Event]),
-],
+  imports: [
+    ConfigModule.forRoot(), // load .env variable
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: '127.0.0.1',
+      port: parseInt(process.env.PORT),
+      username:  process.env.USER_NAME,
+      password: process.env.PASSWORD,
+      database: process.env.DB_NAME,
+      entities: [Event],
+      synchronize: true,
+    }),
 
-  controllers: [AppController, EventsController],
+    EventsModule,
+  ],
+
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
