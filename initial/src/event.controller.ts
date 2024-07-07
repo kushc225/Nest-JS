@@ -34,7 +34,9 @@ export class EventsController {
       where: [{description : Like("%world%")}],
       take: 2,
       skip: 2,
-
+      order : {
+        id : "ASC"
+      }
     });
   }
 
